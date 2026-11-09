@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Jarvis</title>
+<style>
+  /* Minimalista: orb reativo flutuante, um anel fino, uma palavra de estado, uma linha de fala. */
+  :root{ --bg:rgba(8,11,16,.82); --line:#e9f3f7; --accent:#7fe3ff; --accent-dim:#2b5a66;
+         --mut:#5f7682; --speak:#ffd38a; --warn:#ff6b6b;
+         --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace; }
+  *{margin:0;box-sizing:border-box;user-select:none}
+  html,body{height:100%;background:transparent;overflow:hidden;font-family:var(--mono);color:var(--line)}
+  #app{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+       background:radial-gradient(circle at 50% 46%,var(--bg),rgba(4,6,9,.9));border-radius:16px;
+       -webkit-app-region:drag}
+  .quit{position:fixed;top:8px;right:12px;font-size:13px;color:var(--mut);cursor:pointer;-webkit-app-region:no-drag}
+  .quit:hover{color:var(--warn)}
+  canvas{-webkit-app-region:no-drag;cursor:pointer}
+  .state{font-size:10px;letter-spacing:.42em;text-transform:uppercase;color:var(--mut);margin-top:14px;min-height:12px}
+  .transcript{width:84%;max-width:360px;text-align:center;font-size:13px;line-height:1.5;color:var(--line);
+       margin-top:12px;min-height:3em;opacity:.95}
+  .you{font-size:11px;color:var(--accent);opacity:.8;min-height:1.3em;margin-top:2px}
+  .foot{position:fixed;bottom:10px;left:0;right:0;display:flex;flex-direction:column;align-items:center;gap:7px;-webkit-app-region:no-drag}
+  .scope{font-size:9px;letter-spacing:.1em;color:var(--mut)}
+  .scope b{color:var(--accent);font-weight:400}
+  input{width:78%;max-width:320px;background:rgba(255,255,255,.05);border:1px solid var(--accent-dim);
+       border-radius:20px;color:var(--line);font-family:var(--mono);font-size:12px;padding:7px 14px;outline:none}
+  input:focus{border-color:var(--accent)}
+  input::placeholder{color:var(--mut)}
+</style>
+</head>
+<body>
+  <div id="app">
+    <span class="quit" id="quit">✕</span>
+    <canvas id="orb" width="220" height="220"></canvas>
+    <div class="state" id="state">iniciando</div>
+    <div class="you" id="you"></div>
+    <div class="transcript" id="transcript">Clique no núcleo (ou tecla Espaço) para falar, ou digite abaixo.</div>
+  </div>
+  <div class="foot">
+    <div class="scope" id="scope">escopo: —</div>
+    <input id="text" placeholder="falar por texto…" autocomplete="off">
+  </div>
+
+<script>
+const $=id=>document.getElementById(id);
+const orb=$('orb'), ctx=orb.getContext('2d'); const DPR=Math.min(2,devicePixelRatio||1);
+orb.width=220*DPR; orb.height=220*DPR; orb.style.width=orb.style.height='220px'; ctx.scale(DPR,DPR);
+const reduce=matchMedia('(prefers-reduced-motion:reduce)').matches;
+
+let state='idle', level=0, target=0, spin=0, t0=performance.now();
+const colors={idle:'#7fe3ff',listening:'#7fe3ff',thinking:'#9ad1ff',speaking:'#ffd38a'};
+
+function env(now){const s=now/1000;
+  if(state==='listening')return .4+.35*Math.abs(Math.sin(s*5))*(0.6+0.4*Math.sin(s*12));
+  if(state==='thinking') return .3+.12*Math.sin(s*8);
+  if(state==='speaking') return .5+.4*Math.abs(Math.sin(s*7+Math.sin(s*3)));
+  return .14+.06*Math.sin(s*1.4);
+}
+function draw(now){
+  const dt=now-t0;t0=now; target=env(now); level+=(target-level)*.12;
+  if(!reduce) spin+=dt*0.0003*(state==='thinking'?3:1);
+  const cx=110,cy=110, col=colors[state]||'#7fe3ff';
+  ctx.clearRect(0,0,220,220);
+  // thin outer ring
+  ctx.beginPath();ctx.arc(cx,cy,86,0,Math.PI*2);ctx.strokeStyle=col;ctx.globalAlpha=.18;ctx.lineWidth=1;ctx.stroke();
+  // reactive arc
+  ctx.beginPath();ctx.arc(cx,cy,86,spin,spin+Math.PI*(0.3+level*0.9));ctx.globalAlpha=.8;ctx.lineWidth=1.6;ctx.lineCap='round';ctx.stroke();ctx.lineCap='butt';
+  // glow
+  const R=34+level*34, g=ctx.createRadialGradient(cx,cy,0,cx,cy,R*2.4);
+  const rgb=col==='#ffd38a'?'255,211,138':'127,227,255';
+  g.addColorStop(0,`rgba(${rgb},${.5+level*.4})`);g.addColorStop(.5,`rgba(${rgb},.1)`);g.addColorStop(1,`rgba(${rgb},0)`);
+  ctx.globalAlpha=1;ctx.fillStyle=g;ctx.beginPath();ctx.arc(cx,cy,R*2.4,0,Math.PI*2);ctx.fill();
+  // core
+  const core=ctx.createRadialGradient(cx,cy,0,cx,cy,R);
+  core.addColorStop(0,'#ffffff');core.addColorStop(.5,col);core.addColorStop(1,`rgba(${rgb},.05)`);
+  ctx.fillStyle=core;ctx.beginPath();ctx.arc(cx,cy,R*0.7,0,Math.PI*2);ctx.fill();
+  requestAnimationFrame(draw);
+}
+requestAnimationFrame(draw);
+
+const labels={idle:'em espera',listening:'ouvindo',thinking:'pensando',speaking:'falando'};
+window.jarvis.on('state',s=>{state=s; $('state').textContent=labels[s]||s;});
+window.jarvis.on('transcript',t=>{ $('transcript').textContent=t; });
+window.jarvis.on('you',t=>{ $('you').textContent='“'+t+'”'; });
+window.jarvis.on('deps',d=>{
+  if(!d.brain) $('transcript').textContent='Cérebro indisponível. Veja o README (Claude Code ou Ollama).';
+  else if(!d.whisper||!d.piper) $('state').title='voz/ouvido parciais — digite para conversar; veja README';
+});
+window.jarvis.on('scope',s=>{
+  $('scope').textContent='escopo ['+s.mode+']: '+(s.authorized.length? s.authorized.join('  ·  '):'vazio');
+});
+
+orb.addEventListener('click',()=>window.jarvis.toggleListen());
+$('quit').addEventListener('click',()=>window.close());
+$('text').addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&e.target.value.trim()){ window.jarvis.askText(e.target.value.trim()); e.target.value=''; }
+});
+// Atalhos globais: Espaço = falar (push-to-talk); Esc = interromper a fala.
+document.addEventListener('keydown',e=>{
+  if(e.target.tagName==='INPUT') return;
+  if(e.code==='Space'){ e.preventDefault(); window.jarvis.toggleListen(); }
+  else if(e.key==='Escape'){ window.jarvis.stopSpeak(); }
+});
+</script>
+</body>
+</html>

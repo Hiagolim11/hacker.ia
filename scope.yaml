@@ -1,0 +1,16 @@
+# ESCOPO AUTORIZADO — o Jarvis só orienta/age contra o que estiver listado aqui.
+# Fora daqui = bloqueado. Para engajamento real, preencha authorization_ref com
+# o nº do contrato/ordem de serviço assinada antes de usar.
+
+mode: advisory          # advisory = só orienta e explica, nunca executa exploit sozinho
+                        # (não mude para 'execute' sem ler o README, seção "Execução de ferramentas")
+
+authorized:
+  - 10.10.10.0/24       # lab local
+  - target.htb          # ctf / HackTheBox
+
+authorization_ref: "lab pessoal / CTF"   # engajamento real: nº do escopo assinado + data
+
+# Fora de escopo = bloqueado explicitamente (ex.: produção, terceiros).
+blocked:
+  - "*"                 # tudo que não estiver em 'authorized'

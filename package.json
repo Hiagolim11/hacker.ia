@@ -1,0 +1,14 @@
+{
+  "name": "jarvis-os",
+  "version": "0.1.0",
+  "description": "Assistente de pentest por voz, estilo Jarvis, para Kali Linux",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "check": "node main.js --check"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^32.2.0"
+  }
+}

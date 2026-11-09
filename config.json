@@ -1,0 +1,25 @@
+{
+  "_comment": "Caminhos e ajustes. Troque os binários/modelos conforme seu Kali. Rode ./setup.sh para instalar e baixar modelos.",
+
+  "brain": "ollama",
+  "_brain_opcoes": "claude = Claude Code (ótimo pra estudo; recusa exploração por política). ollama = modelo local offline, sem safeguards, pro lado ofensivo em lab/CTF.",
+
+  "claudeBin": "claude",
+  "claudeArgs": ["-p", "--model", "claude-sonnet-5-5"],
+
+  "ollamaModel": "llama3.2:3b",
+
+  "recordCmd": "arecord",
+  "recordArgs": ["-q", "-f", "S16_LE", "-r", "16000", "-c", "1"],
+
+  "whisperBin": "/home/kali/jarvis-os/whisper-cli",
+  "whisperModel": "models/ggml-small.bin",
+  "whisperLang": "pt",
+
+  "piperBin": "./piper/piper",
+  "piperModel": "models/pt_BR-faber-medium.onnx",
+  "playCmd": "aplay",
+
+  "maxRecordSeconds": 20,
+  "window": { "width": 420, "height": 420, "alwaysOnTop": true }
+}

@@ -1,0 +1,14 @@
+# dependências e binários (reinstalados pelo setup.sh)
+node_modules/
+piper/
+whisper-cli
+
+# modelos de IA (baixados pelo setup.sh — pesados)
+models/
+*.onnx
+*.onnx.json
+*.bin
+
+# saídas de áudio e logs
+*.wav
+*.log
