@@ -74,6 +74,18 @@ npm start
 > O `setup.sh` baixa ~500 MB (modelo de fala + voz neural). Esses arquivos **não** vêm
 > no repositório de propósito — são recriados pelo script.
 
+### 📥 Instalar via pacote `.deb` (alternativa)
+
+Baixe o `.deb` na página de [Releases](https://github.com/Hiagolim11/hacker.ia/releases)
+e instale — o apt resolve as dependências e o pacote baixa a voz e o modelo de fala:
+
+```bash
+sudo apt install ./hacker-ia_0.1.0_amd64.deb
+hacker-ia          # ou abra "hacker.ia" pelo menu
+```
+
+Para gerar o `.deb` você mesmo: `bash build-deb.sh` (sai em `dist/`).
+
 ### Compilar o whisper.cpp (ouvido), se faltar
 ```bash
 sudo apt-get install -y cmake

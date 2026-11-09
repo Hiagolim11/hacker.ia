@@ -12,3 +12,6 @@ models/
 # saídas de áudio e logs
 *.wav
 *.log
+
+# pacotes gerados
+dist/

@@ -12,7 +12,7 @@
   "recordCmd": "arecord",
   "recordArgs": ["-q", "-f", "S16_LE", "-r", "16000", "-c", "1"],
 
-  "whisperBin": "/home/kali/jarvis-os/whisper-cli",
+  "whisperBin": "./whisper-cli",
   "whisperModel": "models/ggml-small.bin",
   "whisperLang": "pt",
 
